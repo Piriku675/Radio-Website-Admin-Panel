@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WVBZ 98.7 — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/layout.css" />
+<link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     LOGIN
+══════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">WV<span>BZ</span> 98.7</div>
+    <div class="login-sub">Admin Panel · Authorised Access Only</div>
+    <div class="form-field mb-12">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="admin@wvbz.com" autocomplete="email" />
+    </div>
+    <div class="form-field mb-12">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" id="login-btn">Sign In</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════
+     APP SHELL
+══════════════════════════════ -->
+<div id="app" style="display:none">
+
+  <!-- Top Nav -->
+  <nav class="top-nav">
+    <button class="nav-sidebar-toggle" id="hamburger-btn" aria-label="Menu">☰</button>
+    <div class="nav-logo">WV<span>BZ</span> 98.7</div>
+    <div class="nav-badge">Admin</div>
+    <div class="nav-spacer"></div>
+    <div class="nav-user" id="nav-user-email"></div>
+    <button class="btn btn-ghost btn-sm" id="signout-btn">Sign Out</button>
+  </nav>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Overview</div>
+        <button class="nav-item active" data-panel="dashboard">
+          <span class="nav-icon">⚡</span> Dashboard
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Live</div>
+        <button class="nav-item" data-panel="livestream">
+          <span class="nav-icon">📡</span> Live Stream
+          <span class="nav-live-dot" id="nav-live-dot"></span>
+        </button>
+        <button class="nav-item" data-panel="schedule">
+          <span class="nav-icon">📅</span> Schedule
+        </button>
+        <button class="nav-item" data-panel="promostrip">
+          <span class="nav-icon">📢</span> Promo Strip
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Content</div>
+        <button class="nav-item" data-panel="shows">
+          <span class="nav-icon">🎙</span> Shows
+        </button>
+        <button class="nav-item" data-panel="hosts">
+          <span class="nav-icon">🎤</span> Hosts
+        </button>
+        <button class="nav-item" data-panel="articles">
+          <span class="nav-icon">📰</span> Articles
+        </button>
+        <button class="nav-item" data-panel="facebookfeed">
+          <span class="nav-icon">💬</span> Facebook Feed
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Promotions</div>
+        <button class="nav-item" data-panel="promotions">
+          <span class="nav-icon">🎫</span> Promotions
+        </button>
+        <button class="nav-item" data-panel="winners">
+          <span class="nav-icon">🏆</span> Winners
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Settings</div>
+        <button class="nav-item" data-panel="config-station">
+          <span class="nav-icon">📻</span> Station Info
+        </button>
+        <button class="nav-item" data-panel="config-about">
+          <span class="nav-icon">ℹ️</span> About Page
+        </button>
+        <button class="nav-item" data-panel="config-contact">
+          <span class="nav-icon">📞</span> Contact Info
+        </button>
+      </div>
+
+    </div><!-- /sidebar-inner -->
+
+    <!-- Overview toggle at bottom of sidebar -->
+    <button class="overview-toggle-btn" id="overview-toggle-btn">
+      <span class="arrow">▲</span>
+      <span class="toggle-label">Hide Overview</span>
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="page-desc">Station overview — live data from Firestore.</div>
+
+      <div id="overview-collapse-body">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Stream Status</div>
+            <div class="stat-val stat-offline" id="dash-live">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">On Air Now</div>
+            <div class="stat-val" style="font-size:16px;line-height:1.2" id="dash-show">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Published Articles</div>
+            <div class="stat-val" id="dash-articles">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Promo</div>
+            <div class="stat-val" style="font-size:14px;line-height:1.3" id="dash-promo">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-two-col">
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚡ Quick Actions</div></div>
+          <div class="card-body quick-actions">
+            <button class="btn btn-secondary btn-block" onclick="goPanel('livestream')">📡 Live Stream</button>
+            <button class="btn btn-secondary btn-block" onclick="goPanel('schedule')">📅 Schedule</button>
+            <button class="btn btn-secondary btn-block" onclick="goPanel('articles')">✏️ Articles</button>
+            <button class="btn btn-secondary btn-block" onclick="goPanel('promotions')">🎫 Promotions</button>
+            <button class="btn btn-secondary btn-block" onclick="goPanel('shows')">🎙 Shows</button>
+            <button class="btn btn-secondary btn-block" onclick="goPanel('hosts')">🎤 Hosts</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📋 Collection Counts</div></div>
+          <div class="card-body">
+            <table>
+              <tr><td>Shows</td>      <td class="td-mono" id="dash-c-shows">—</td></tr>
+              <tr><td>Hosts</td>      <td class="td-mono" id="dash-c-hosts">—</td></tr>
+              <tr><td>Articles</td>   <td class="td-mono" id="dash-c-articles">—</td></tr>
+              <tr><td>Promotions</td> <td class="td-mono" id="dash-c-promos">—</td></tr>
+              <tr><td>Winners</td>    <td class="td-mono" id="dash-c-winners">—</td></tr>
+              <tr><td>FB Posts</td>   <td class="td-mono" id="dash-c-fb">—</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LIVE STREAM ── -->
+    <div class="panel" id="panel-livestream">
+      <div class="page-title">Live Stream</div>
+      <div class="page-desc">Toggle the stream on/off and set the stream URL. The current show is auto-detected from the schedule.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📡 Stream Settings</div>
+          <button class="btn btn-primary btn-sm" id="save-livestream-btn">Save</button>
+        </div>
+        <div class="card-body">
+          <div class="live-bar">
+            <div class="live-dot offline" id="stream-live-dot"></div>
+            <div id="stream-live-label" style="font-size:13px;font-weight:600">Stream is Offline</div>
+          </div>
+
+          <!-- Auto-detected show from schedule -->
+          <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--line2);margin-bottom:14px">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Current Show (from schedule)</div>
+            <div id="ls-auto-show" style="font-size:13px;display:flex;align-items:center;flex-wrap:wrap;gap:6px">Loading…</div>
+            <div id="ls-auto-tagline" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+          </div>
+
+          <div class="form-grid cols-1">
+            <div class="form-field">
+              <label>Stream URL</label>
+              <input type="url" id="ls-streamUrl" placeholder="https://your-icecast-stream.com/live" />
+              <div class="form-hint">The Icecast / Shoutcast stream endpoint that browsers connect to.</div>
+            </div>
+            <div class="toggle-row" style="margin-top:4px">
+              <label class="toggle"><input type="checkbox" id="ls-isLive" /><span class="toggle-slider"></span></label>
+              <label for="ls-isLive" style="font-size:13px">Stream is Live (shows ON AIR badge on public site)</label>
+            </div>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
+            Saving updates <code>config/liveStream</code> in Firestore. The current show name,
+            thumbnail, and timeslot are automatically filled from the schedule — no manual entry needed.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCHEDULE ── -->
+    <div class="panel" id="panel-schedule">
+      <div class="page-title">Schedule</div>
+      <div class="page-desc">Manage which shows air on which days and at what times. Weekday and weekend schedules are separate.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📅 On-Air Schedule</div>
+          <button class="btn btn-primary btn-sm" id="add-slot-btn">+ Add Slot</button>
+        </div>
+        <div style="padding:0 16px">
+          <div class="schedule-day-tabs" id="sched-day-tabs"></div>
+        </div>
+        <div style="padding:0 16px 16px" id="sched-slots-body"></div>
+      </div>
+    </div>
+
+    <!-- ── PROMO STRIP ── -->
+    <div class="panel" id="panel-promostrip">
+      <div class="page-title">Promo Strip</div>
+      <div class="page-desc">Announcement banners shown across the public site.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📢 Strips</div>
+          <button class="btn btn-primary btn-sm" id="add-promostrip-btn">+ New Strip</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Title</th><th>Subtitle</th><th>Order</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="promostrip-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SHOWS ── -->
+    <div class="panel" id="panel-shows">
+      <div class="page-title">Shows</div>
+      <div class="page-desc">
+        Manage all radio shows. <strong>Featured</strong> only controls the homepage spotlight — it does not indicate a show is currently live (that's the schedule).
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎙 All Shows</div>
+          <button class="btn btn-primary btn-sm" id="add-show-btn">+ New Show</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Name</th><th>Time Slot</th><th>Host(s)</th><th>Featured</th><th>Order</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="shows-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HOSTS ── -->
+    <div class="panel" id="panel-hosts">
+      <div class="page-title">Hosts</div>
+      <div class="page-desc">Manage presenter profiles, bios, and photos.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎤 All Hosts</div>
+          <button class="btn btn-primary btn-sm" id="add-host-btn">+ New Host</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Photo</th><th>Name</th><th>Role</th><th>Shows</th><th>Order</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="hosts-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ARTICLES ── -->
+    <div class="panel" id="panel-articles">
+      <div class="page-title">Articles</div>
+      <div class="page-desc">Write, publish and manage blog posts. Only published articles appear on the public site.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📰 All Articles</div>
+          <button class="btn btn-primary btn-sm" id="add-article-btn">+ New Article</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Title</th><th>Category</th><th>Status</th><th>Date</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="articles-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FACEBOOK FEED ── -->
+    <div class="panel" id="panel-facebookfeed">
+      <div class="page-title">Facebook Feed</div>
+      <div class="page-desc">Posts shown in the Facebook feed widget on the homepage.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💬 Feed Posts</div>
+          <button class="btn btn-primary btn-sm" id="add-fb-btn">+ Add Post</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Post Text</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="fb-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROMOTIONS ── -->
+    <div class="panel" id="panel-promotions">
+      <div class="page-title">Promotions</div>
+      <div class="page-desc">Giveaways and competitions.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎫 All Promotions</div>
+          <button class="btn btn-primary btn-sm" id="add-promo-btn">+ New Promotion</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Title</th><th>Status</th><th>Starts</th><th>Ends</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="promos-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WINNERS ── -->
+    <div class="panel" id="panel-winners">
+      <div class="page-title">Winners</div>
+      <div class="page-desc">Record and publish competition winners.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🏆 All Winners</div>
+          <button class="btn btn-primary btn-sm" id="add-winner-btn">+ Add Winner</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Name</th><th>Location</th><th>Prize</th><th>Announced</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="winners-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONFIG: STATION ── -->
+    <div class="panel" id="panel-config-station">
+      <div class="page-title">Station Info</div>
+      <div class="page-desc">Core identity — call sign, frequency, tagline.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📻 config/station</div>
+          <button class="btn btn-primary btn-sm" id="save-station-btn">Save</button>
+        </div>
+        <div class="card-body">
+          <div class="form-grid cols-3">
+            <div class="form-field">
+              <label>Call Sign</label>
+              <input type="text" id="st-callSign" />
+            </div>
+            <div class="form-field">
+              <label>Frequency</label>
+              <input type="text" id="st-frequency" />
+            </div>
+            <div class="form-field">
+              <label>Established</label>
+              <input type="text" id="st-established" />
+            </div>
+            <div class="form-field span-3">
+              <label>Tagline</label>
+              <input type="text" id="st-tagline" />
+            </div>
+          </div>
+          <hr class="form-section-divider" />
+          <div class="form-section-label">Facebook Page</div>
+          <div class="form-grid cols-3">
+            <div class="form-field">
+              <label>Page Name</label>
+              <input type="text" id="st-fb-pageName" />
+            </div>
+            <div class="form-field">
+              <label>Followers Label</label>
+              <input type="text" id="st-fb-followersLabel" />
+            </div>
+            <div class="form-field">
+              <label>Page URL</label>
+              <input type="url" id="st-fb-pageUrl" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONFIG: ABOUT ── -->
+    <div class="panel" id="panel-config-about">
+      <div class="page-title">About Page</div>
+      <div class="page-desc">Content shown on the About section of the public site.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">ℹ️ config/about</div>
+          <button class="btn btn-primary btn-sm" id="save-about-btn">Save</button>
+        </div>
+        <div class="card-body">
+          <div class="form-grid cols-3" style="margin-bottom:16px">
+            <div class="form-field">
+              <label>Listeners Stat</label>
+              <input type="text" id="ab-statsListeners" placeholder="400K+" />
+            </div>
+            <div class="form-field">
+              <label>Years on Air</label>
+              <input type="text" id="ab-statsYears" placeholder="20+" />
+            </div>
+            <div class="form-field">
+              <label>Daily Shows</label>
+              <input type="text" id="ab-statsShows" placeholder="6" />
+            </div>
+          </div>
+          <div class="form-grid cols-1">
+            <div class="form-field">
+              <label>Who We Are</label>
+              <textarea id="ab-whoWeAre" rows="5"></textarea>
+            </div>
+            <div class="form-field">
+              <label>Mission</label>
+              <textarea id="ab-mission" rows="5"></textarea>
+            </div>
+            <div class="form-field">
+              <label>Background / History</label>
+              <textarea id="ab-background" rows="5"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONFIG: CONTACT ── -->
+    <div class="panel" id="panel-config-contact">
+      <div class="page-title">Contact Info</div>
+      <div class="page-desc">Contact details and social links shown on the Contact page.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📞 config/contact</div>
+          <button class="btn btn-primary btn-sm" id="save-contact-btn">Save</button>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>WhatsApp Number</label>
+              <input type="text" id="ct-whatsapp" />
+            </div>
+            <div class="form-field span-2">
+              <label>WhatsApp Description</label>
+              <textarea id="ct-whatsappDesc" rows="2"></textarea>
+            </div>
+          </div>
+          <hr class="form-section-divider" />
+          <div class="form-section-label">Social Links</div>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Facebook Handle</label>
+              <input type="text" id="ct-fb-handle" />
+            </div>
+            <div class="form-field">
+              <label>Facebook URL</label>
+              <input type="url" id="ct-fb-url" />
+            </div>
+            <div class="form-field">
+              <label>TikTok Handle</label>
+              <input type="text" id="ct-tt-handle" />
+            </div>
+            <div class="form-field">
+              <label>TikTok URL</label>
+              <input type="url" id="ct-tt-url" />
+            </div>
+            <div class="form-field">
+              <label>WhatsApp Handle</label>
+              <input type="text" id="ct-wa-handle" />
+            </div>
+            <div class="form-field">
+              <label>WhatsApp URL</label>
+              <input type="url" id="ct-wa-url" />
+            </div>
+          </div>
+          <hr class="form-section-divider" />
+          <div class="form-field">
+            <label>Station Address</label>
+            <textarea id="ct-address" rows="4"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main><!-- /main -->
+</div><!-- /app -->
+
+
+<!-- ══════════════════════════════
+     MODALS
+══════════════════════════════ -->
+
+<!-- Show Modal -->
+<div class="modal-overlay" id="modal-show">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-title" id="modal-show-title">Edit Show</div>
+      <button class="modal-close" onclick="closeModal('modal-show')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" id="show-id-row">
+        <div class="form-field span-2">
+          <label>Show ID (URL-safe, set once)</label>
+          <input type="text" id="show-id" placeholder="morning-vibes" />
+          <div class="form-hint">Auto-generated from name if left blank. Cannot be changed after creation.</div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Show Name</label>
+          <input type="text" id="show-name" />
+        </div>
+        <div class="form-field">
+          <label>Emoji</label>
+          <input type="text" id="show-emoji" placeholder="🎙" />
+        </div>
+        <div class="form-field">
+          <label>Time Slot (display)</label>
+          <input type="text" id="show-timeSlot" placeholder="Mon – Fri · 6:00 – 10:00 AM" />
+        </div>
+        <div class="form-field">
+          <label>Short Display Time</label>
+          <input type="text" id="show-displayTime" placeholder="6–10 AM" />
+        </div>
+        <div class="form-field">
+          <label>Order</label>
+          <input type="number" id="show-order" min="1" />
+        </div>
+        <div class="form-field" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="show-featured" /><span class="toggle-slider"></span></label>
+            <label for="show-featured">Featured on homepage</label>
+          </div>
+        </div>
+        <div class="form-field span-2">
+          <label>Thumbnail URL</label>
+          <input type="url" id="show-thumbnailUrl" />
+        </div>
+        <div class="form-field span-2">
+          <label>Description</label>
+          <textarea id="show-description" rows="4"></textarea>
+        </div>
+        <div class="form-field span-2">
+          <label>Features / Highlights (one per line)</label>
+          <textarea id="show-features" rows="4" placeholder="Top 40, R&amp;B, and hip-hop — no filler&#10;Weekly celebrity interviews"></textarea>
+          <div class="form-hint">Each line is a bullet point on the show detail page.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-show')">Cancel</button>
+      <button class="btn btn-primary" id="save-show-btn">Save Show</button>
+    </div>
+  </div>
+</div>
+
+<!-- Host Modal -->
+<div class="modal-overlay" id="modal-host">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-title" id="modal-host-title">Edit Host</div>
+      <button class="modal-close" onclick="closeModal('modal-host')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" id="host-id-row">
+        <div class="form-field span-2">
+          <label>Host ID (URL-safe, set once)</label>
+          <input type="text" id="host-id" placeholder="dj-marcus-bell" />
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Name</label>
+          <input type="text" id="host-name" />
+        </div>
+        <div class="form-field">
+          <label>Role</label>
+          <input type="text" id="host-role" placeholder="Morning Host · Morning Vibes" />
+        </div>
+        <div class="form-field">
+          <label>Emoji</label>
+          <input type="text" id="host-emoji" />
+        </div>
+        <div class="form-field">
+          <label>Order</label>
+          <input type="number" id="host-order" min="1" />
+        </div>
+        <div class="form-field span-2">
+          <label>Photo URL</label>
+          <input type="url" id="host-photoUrl" />
+          <img id="host-photo-preview" class="img-thumb" src="" alt="" style="margin-top:6px;display:none" />
+        </div>
+        <div class="form-field span-2">
+          <label>Short Bio (one line)</label>
+          <input type="text" id="host-shortBio" />
+        </div>
+        <div class="form-field span-2">
+          <label>Full Bio</label>
+          <textarea id="host-bio" rows="5"></textarea>
+        </div>
+        <div class="form-field">
+          <label>Instagram URL</label>
+          <input type="text" id="host-instagram" />
+        </div>
+        <div class="form-field">
+          <label>Twitter/X URL</label>
+          <input type="text" id="host-twitter" />
+        </div>
+        <div class="form-field span-2">
+          <label>Show IDs (comma-separated)</label>
+          <input type="text" id="host-showIds" placeholder="morning-vibes, midday-mix" />
+          <div class="form-hint">Must match show document IDs exactly.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-host')">Cancel</button>
+      <button class="btn btn-primary" id="save-host-btn">Save Host</button>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Slot Modal -->
+<div class="modal-overlay" id="modal-slot">
+  <div class="modal-box modal-narrow">
+    <div class="modal-head">
+      <div class="modal-head-title" id="modal-slot-title">Add Schedule Slot</div>
+      <button class="modal-close" onclick="closeModal('modal-slot')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid cols-1">
+        <div class="form-field">
+          <label>Show</label>
+          <select id="slot-showId">
+            <option value="">— Select a show —</option>
+          </select>
+        </div>
+        <input type="hidden" id="slot-showName" />
+        <div class="form-field">
+          <label>Start Hour (24h, e.g. 6 = 6AM, 14 = 2PM)</label>
+          <input type="number" id="slot-startHour" min="0" max="23" value="6" />
+        </div>
+        <div class="form-field">
+          <label>Display Time (shown to users)</label>
+          <input type="text" id="slot-displayTime" placeholder="6:00 – 10:00 AM" />
+        </div>
+        <div class="form-field">
+          <label>Days</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text)">
+              <input type="checkbox" id="slot-day-monday" /> Monday
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text)">
+              <input type="checkbox" id="slot-day-tuesday" /> Tuesday
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text)">
+              <input type="checkbox" id="slot-day-wednesday" /> Wednesday
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text)">
+              <input type="checkbox" id="slot-day-thursday" /> Thursday
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text)">
+              <input type="checkbox" id="slot-day-friday" /> Friday
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text)">
+              <input type="checkbox" id="slot-day-saturday" /> Saturday
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;text-transform:none;letter-spacing:0;color:var(--text)">
+              <input type="checkbox" id="slot-day-sunday" /> Sunday
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-slot')">Cancel</button>
+      <button class="btn btn-primary" id="save-slot-btn">Save Slot</button>
+    </div>
+  </div>
+</div>
+
+<!-- Article Modal -->
+<div class="modal-overlay" id="modal-article">
+  <div class="modal-box modal-wide">
+    <div class="modal-head">
+      <div class="modal-head-title" id="modal-article-title">Edit Article</div>
+      <button class="modal-close" onclick="closeModal('modal-article')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-field span-2">
+          <label>Title</label>
+          <input type="text" id="art-title" />
+        </div>
+        <div class="form-field">
+          <label>Category</label>
+          <input type="text" id="art-category" placeholder="Music, Station News, Promotions…" />
+        </div>
+        <div class="form-field">
+          <label>Emoji</label>
+          <input type="text" id="art-emoji" placeholder="📰" />
+        </div>
+        <div class="form-field span-2">
+          <label>Excerpt</label>
+          <textarea id="art-excerpt" rows="2"></textarea>
+        </div>
+        <div class="form-field span-2">
+          <label>Thumbnail URL</label>
+          <input type="url" id="art-thumbnailUrl" />
+        </div>
+        <div class="form-field span-2">
+          <label>Header Image URL</label>
+          <input type="url" id="art-imageUrl" />
+        </div>
+        <div class="form-field span-2">
+          <label>Content (HTML)</label>
+          <textarea id="art-contentHtml" rows="10" style="font-family:var(--mono);font-size:12px"></textarea>
+          <div class="form-hint">Use &lt;p&gt; tags for paragraphs. HTML is supported.</div>
+        </div>
+        <div class="form-field">
+          <label>Published At (ISO date)</label>
+          <input type="text" id="art-publishedAt" placeholder="2025-04-18T07:00:00Z" />
+        </div>
+        <div class="form-field" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" id="art-published" /><span class="toggle-slider"></span></label>
+            <label for="art-published">Published (visible on site)</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-article')">Cancel</button>
+      <button class="btn btn-primary" id="save-article-btn">Save Article</button>
+    </div>
+  </div>
+</div>
+
+<!-- Promo Modal -->
+<div class="modal-overlay" id="modal-promo">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-title" id="modal-promo-title">Edit Promotion</div>
+      <button class="modal-close" onclick="closeModal('modal-promo')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-field span-2">
+          <label>Title</label>
+          <input type="text" id="promo-title" />
+        </div>
+        <div class="form-field">
+          <label>Emoji</label>
+          <input type="text" id="promo-emoji" />
+        </div>
+        <div class="form-field">
+          <label>Status</label>
+          <select id="promo-status">
+            <option value="active">Active</option>
+            <option value="ended">Ended</option>
+          </select>
+        </div>
+        <div class="form-field span-2">
+          <label>Status Label</label>
+          <input type="text" id="promo-statusLabel" placeholder="Active · Ends Friday" />
+        </div>
+        <div class="form-field span-2">
+          <label>Description</label>
+          <textarea id="promo-description" rows="3"></textarea>
+        </div>
+        <div class="form-field span-2">
+          <label>Image URL</label>
+          <input type="url" id="promo-imageUrl" />
+        </div>
+        <div class="form-field span-2">
+          <label>CTA URL</label>
+          <input type="url" id="promo-ctaUrl" />
+        </div>
+        <div class="form-field">
+          <label>Starts At (ISO)</label>
+          <input type="text" id="promo-startsAt" />
+        </div>
+        <div class="form-field">
+          <label>Ends At (ISO)</label>
+          <input type="text" id="promo-endsAt" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-promo')">Cancel</button>
+      <button class="btn btn-primary" id="save-promo-btn">Save Promotion</button>
+    </div>
+  </div>
+</div>
+
+<!-- Winner Modal -->
+<div class="modal-overlay" id="modal-winner">
+  <div class="modal-box modal-narrow">
+    <div class="modal-head">
+      <div class="modal-head-title" id="modal-winner-title">Add Winner</div>
+      <button class="modal-close" onclick="closeModal('modal-winner')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid cols-1">
+        <div class="form-field">
+          <label>Winner Name</label>
+          <input type="text" id="win-name" placeholder="Sarah T." />
+        </div>
+        <div class="form-field">
+          <label>Location</label>
+          <input type="text" id="win-location" placeholder="Port Moresby" />
+        </div>
+        <div class="form-field">
+          <label>Prize</label>
+          <input type="text" id="win-prize" />
+        </div>
+        <div class="form-field">
+          <label>Announced At (ISO)</label>
+          <input type="text" id="win-announcedAt" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-winner')">Cancel</button>
+      <button class="btn btn-primary" id="save-winner-btn">Save Winner</button>
+    </div>
+  </div>
+</div>
+
+<!-- Promo Strip Modal -->
+<div class="modal-overlay" id="modal-promostrip">
+  <div class="modal-box modal-narrow">
+    <div class="modal-head">
+      <div class="modal-head-title" id="modal-ps-title">Promo Strip</div>
+      <button class="modal-close" onclick="closeModal('modal-promostrip')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid cols-1">
+        <div class="form-field">
+          <label>Title</label>
+          <input type="text" id="ps-title" />
+        </div>
+        <div class="form-field">
+          <label>Subtitle</label>
+          <input type="text" id="ps-subtitle" />
+        </div>
+        <div class="form-field">
+          <label>Link Page</label>
+          <input type="text" id="ps-linkPage" placeholder="promotions" />
+        </div>
+        <div class="form-field">
+          <label>Order</label>
+          <input type="number" id="ps-order" min="1" />
+        </div>
+        <div class="toggle-row" style="margin-top:4px">
+          <label class="toggle"><input type="checkbox" id="ps-active" /><span class="toggle-slider"></span></label>
+          <label for="ps-active">Active (visible on site)</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-promostrip')">Cancel</button>
+      <button class="btn btn-primary" id="save-ps-btn">Save Strip</button>
+    </div>
+  </div>
+</div>
+
+<!-- Facebook Post Modal -->
+<div class="modal-overlay" id="modal-fb">
+  <div class="modal-box modal-narrow">
+    <div class="modal-head">
+      <div class="modal-head-title" id="modal-fb-title">Add Post</div>
+      <button class="modal-close" onclick="closeModal('modal-fb')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid cols-1">
+        <div class="form-field">
+          <label>Post Text</label>
+          <textarea id="fb-text" rows="4"></textarea>
+        </div>
+        <div class="form-field">
+          <label>Posted At (ISO)</label>
+          <input type="text" id="fb-postedAt" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('modal-fb')">Cancel</button>
+      <button class="btn btn-primary" id="save-fb-btn">Save Post</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title">Confirm</div>
+    <div class="confirm-msg" id="confirm-msg">Are you sure?</div>
+    <div class="confirm-btns">
+      <button class="btn btn-secondary" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast-area"></div>
+
+<!-- ══════════════════════════════
+     SCRIPTS
+══════════════════════════════ -->
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>
